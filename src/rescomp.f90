@@ -34,8 +34,6 @@ subroutine rescomp(lmax, isize, jsize, xx, yy)
 
 	allocate(zz0(0:nmax-1, 1:isize, 1:jsize))
    allocate(sum_v(0:nmax-1, 1:isize, 1:jsize), delt_sum_v(0:nmax-1, 1:isize, 1:jsize))
-   
-	
 	
 	!----------------------------------------------------------------------
 	!出力用フォルダ、ファイル名の設定

@@ -105,13 +105,13 @@ subroutine structured_grid_analysis
 	do n = 1, nmax-1
       call cg_iric_read_sol_count_mul_f(idf(n), lmax0, ier)
       lmax = min(lmax, lmax0)
-  !    if(lmax0 /= lmax) then
-		!	write(*,*) "***** Warning : Number of Output is mismatch *****"
-		!	write(*,*) trim(cname(0))//" : lmax = ", lmax0
-		!	write(*,*) trim(cname(n))//" : lmax = ", lmax
-		!	goto 997
-		!end if
-   end do
+      if(lmax0 /= lmax) then
+			write(*,*) "***** Warning : Number of Output is mismatch *****"
+			write(*,*) trim(cname(0))//" : lmax = ", lmax0
+			write(*,*) trim(cname(n))//" : lmax = ", lmax
+			!goto 997
+		end if
+   end do	
    !lmax = lmax0
 	
 	!----------------------------------------------------------------------

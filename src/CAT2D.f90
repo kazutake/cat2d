@@ -133,32 +133,7 @@ program cat2d
 	call cg_gopath_f(idf(0), '/iRIC/SolverInformation', ier)
 	!call cg_narrays_f(narrays, ier)
 	call cg_array_read_f(1, solname0, ier)
-	
-	!--------------------------------------------------
-	!Nays2DHとMflowにのみ対応している
-	!if( &
-	!	solname0(1:7) == "Nays2DH" .or. &
-	!	solname0(1:8) == "Mflow_02" )then
-	!	
-	!	write(*,"(a, a)") "Solver Name = ", trim(solname0)
-	!	
-	!else
-	!	write(*,"(a)") "***** Error *****"
-	!	write(*,"(a)") "Current CAT2D is implemented for Nays2DH or Mflow_02."
-	!	stop
-	!end if
-	
-	!--------------------------------------------------
-	!!異なるソルバーは比較できない
-	!do n = 1, nmax-1
-	!	call cg_gopath_f(idf(n), '/iRIC/SolverInformation', ier)
-	!	call cg_array_read_f(1, solname, ier)
-	!	
-	!	if(solname /= solname0)then
-	!		write(*,"(a)") "Current version of this tool cannot compare the different solver's result."
-	!		stop
-	!	end if
-	!end do
+	write(*,"(a, a)") "Solver Name for BaseCase is ", trim(solname0)
 
 	!--------------------------------------------------
 	!異なる格子構造の異なるソルバーは比較できない
@@ -175,12 +150,12 @@ program cat2d
 	end do
 
 	if(zonetype0 == 2) then
-		!構造格子★
+		!構造格子
 		write(*,"(a)") "Grid Type = Structured Grid "
 		call structured_grid_analysis
 	
 	elseif(zonetype0 == 3)then
-		!非構造格子★
+		!非構造格子
 		write(*,"(a)") "Grid Type = Unstructured Grid "
 		call unstructured_grid_analysis
 	
