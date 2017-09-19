@@ -35,6 +35,10 @@ program cat2d
    if (ier /=0) STOP "*** Open error of CGNS file ***"
    call cg_iric_init_f(idf0, ier)
 	
+    ! guiに、.cancel ファイルの生成により停止できるソルバであることを知らせる
+    ! ファイルを生成
+    call iric_initoption_f(IRIC_OPTION_CANCEL, ier)
+   
    !--------------------------------------------------
    !比較ケース数の取得　→　各ケースの変数をアロケート 
 	! →　ベースケース＋３ケースまで比較できるようdefinition.xmlで制御している（2016.03.02）

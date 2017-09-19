@@ -6,7 +6,9 @@
 subroutine rescomp(lmax, isize, jsize, xx, yy)
 	use common_params
 	implicit none
-	
+	include 'cgnslib_f.h'
+	include 'iriclib_f.h'
+    
 	integer, intent(in) :: lmax, isize, jsize
 	double precision, dimension(1:isize,1:jsize), intent(in):: xx, yy
 	
@@ -20,6 +22,9 @@ subroutine rescomp(lmax, isize, jsize, xx, yy)
 	!出力ファイル名
 	character(len=22) :: judan_csv
 	character(len=33) :: oudan_csv
+    
+    !パラメータ名の文字数チェック用
+    character(len=strmax) :: wbuf
 	
 	integer :: i,j,k,l,m,n, ii, iip0, jjp0, iip, jjp
 	integer :: ier, id, jp
@@ -95,10 +100,29 @@ subroutine rescomp(lmax, isize, jsize, xx, yy)
 					delt_sum_v(n,i,j) = sum_v(n,i,j) - sum_v(0,i,j)
 				end do
 			end do
-		end do
+      end do
+    
+    ! ユーザがGUI上で "STOP" ボタンを押して実行をキャンセルしたか確認
+    call iric_check_cancel_f(ier)
+    if (ier == 1) then
+        write(*,*) "Solver is stopped because the STOP button was clicked."
+        stop
+    end if
       
+    !
+    ! guiがcgnsファイルを読込中か否かを判定
+    !
+    do
+        call iric_check_lock_f(fname0, ier)
+        if (ier == 1) then
+            call sleep(1)
+        elseif (ier == 0) then  !読込中でなければdoループを抜ける
+            exit
+        end if
+    end do
+    call iric_write_sol_start_f(fname0, ier)
       
-		!----------------------------------------------------------------------
+	!----------------------------------------------------------------------
       !差分値の算出値
 		do m = 1, num_p
 			do n = 1, nmax-1
@@ -119,7 +143,18 @@ subroutine rescomp(lmax, isize, jsize, xx, yy)
 		!比較できるよう　そのまますべてを出力
 		do n = 0, nmax-1
 			do m = 1, num_p
-				call cg_iric_write_sol_real_mul_f(idf0, trim(cname(n))//"_"//trim(pname(n,m)), rval(n,m,:,:), ier)
+                wbuf=""
+                wbuf = trim(cname(n))//"_"//trim(pname(n,m))
+                !write(*,*) len_trim(wbuf)
+                if(len_trim(wbuf)>30) then 
+                    wbuf = wbuf(1:30)
+                    
+                    !write(*,"(a)") "Warning:Output parameter's name is too long for the cgns format."
+                    !write(*,"(a)") "So I would like to reccomend to change the case's name into a short one."
+                    !call iric_write_sol_end_f(fname0, ier)
+                    !stop
+                end if
+				call cg_iric_write_sol_real_mul_f(idf0, wbuf(1:30), rval(n,m,:,:), ier)
 			end do
       end do
 		
@@ -127,14 +162,40 @@ subroutine rescomp(lmax, isize, jsize, xx, yy)
 		!差分値を出力
 		do n = 1, nmax-1
 			do m = 1, num_p
-            call cg_iric_write_sol_real_mul_f(idf0, trim(cname(n))//"-"//trim(cname(0))//"_"//trim(pname(n,m))//"_", delt_rval(n,m,:,:), ier)
-			end do
+                wbuf=""
+                !wbuf = trim(cname(n))//"-"//trim(cname(0))//"_"//trim(pname(n,m))//"_"
+                wbuf = trim(cname(n))//"-"//trim(cname(0))//"_"//trim(pname(n,m))
+                if(len_trim(wbuf)>30) then 
+                    
+                    wbuf = wbuf(1:30)
+                    
+                    !write(*,"(a)") "Warning:Output parameter's name is too long for the cgns format."
+                    !write(*,"(a)") "So I would like to reccomend to change the case's name into a short one."
+                    !call iric_write_sol_end_f(fname0, ier)
+                    !stop
+                end if
+                call cg_iric_write_sol_real_mul_f(idf0, wbuf(1:30), delt_rval(n,m,:,:), ier)
+            end do
          
          !合成流速の差分値
-		   call cg_iric_write_sol_real_mul_f(idf0, trim(cname(n))//"-"//trim(cname(0))//"_SumVelocity", delt_sum_v(n,:,:), ier)
-		end do
+            wbuf=""
+            wbuf = trim(cname(n))//"-"//trim(cname(0))//"_SumVelocity"
+                if(len_trim(wbuf)>30) then 
+                    
+                    wbuf = wbuf(1:30)
+                    
+                    !write(*,"(a)") "Warning:Output parameter's name is too long for the cgns format."
+                    !write(*,"(a)") "So I would like to reccomend to change the case's name into a short one."
+                    
+                end if
+		   call cg_iric_write_sol_real_mul_f(idf0, wbuf(1:30), delt_sum_v(n,:,:), ier)
+        end do
       
+        !HDDへ吐き出し
+        call cg_iric_flush_f(fname0, idf0, ier)
       
+        !出力処理終了
+        call iric_write_sol_end_f(fname0, ier)
 		
 		!----------------------------------------------------------------------
 		!縦断データの出力　→　csv形式で出力(judan_csv = 't=00000000.00(sec).csv')
