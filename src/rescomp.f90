@@ -16,7 +16,9 @@ subroutine rescomp(lmax, isize, jsize, xx, yy)
 	double precision, dimension(:,:,:,:), allocatable :: rval, delt_rval
 	
 	!格子物理変数
+    double precision, dimension(:,:), allocatable::  rval_tmp
 	double precision, dimension(:,:,:), allocatable::  zz0
+    double precision, dimension(:,:), allocatable::  zmin
    double precision, dimension(:,:,:), allocatable::  sum_v, delt_sum_v
 	
 	!出力ファイル名
@@ -38,7 +40,10 @@ subroutine rescomp(lmax, isize, jsize, xx, yy)
 	allocate(delt_rval(0:nmax-1, 1:num_p, 1:isize, 1:jsize))
 
 	allocate(zz0(0:nmax-1, 1:isize, 1:jsize))
+    allocate(zmin(0:nmax-1, 1:isize))
    allocate(sum_v(0:nmax-1, 1:isize, 1:jsize), delt_sum_v(0:nmax-1, 1:isize, 1:jsize))
+   
+   allocate(rval_tmp(1:isize, 1:jsize))
 	
 	!----------------------------------------------------------------------
 	!出力用フォルダ、ファイル名の設定
@@ -67,7 +72,14 @@ subroutine rescomp(lmax, isize, jsize, xx, yy)
 		!計算結果の読込
       do n = 0, nmax-1
 			do m = 1, num_p
-				call cg_iric_read_sol_real_mul_f(idf(n), l, pname(n,m), rval(n,m,:,:), ier)
+				call cg_iric_read_sol_real_mul_f(idf(n), l, pname(n,m), rval_tmp, ier)
+                
+                do j= 1, jsize
+                    do i = 1, isize
+                        rval(n,m,i,j) = rval_tmp(i,j)
+                    end do
+                end do
+                    
 			end do
 		end do
 		
@@ -78,10 +90,23 @@ subroutine rescomp(lmax, isize, jsize, xx, yy)
 				do i = 1, isize
 					do j = 1, jsize
 						zz0(n,i,j) = rval(n,1,i,j)
+                        
 					end do
 				end do
 			end do
-		end if
+        end if
+        
+        !最深河床高の設定
+        do n = 0, nmax-1
+			do i = 1, isize
+                zmin(n,i) = 9999
+				do j = 1, jsize
+                    if(rval(n,1,i,j) < zmin(n,i))then
+                        zmin(n,i) = rval(n,1,i,j)
+                    end if
+				end do
+			end do
+		end do
       
       !----------------------------------------------------------------------
 		!合成ベクトルの絶対値
@@ -112,14 +137,14 @@ subroutine rescomp(lmax, isize, jsize, xx, yy)
     !
     ! guiがcgnsファイルを読込中か否かを判定
     !
-    do
-        call iric_check_lock_f(fname0, ier)
-        if (ier == 1) then
-            call sleep(1)
-        elseif (ier == 0) then  !読込中でなければdoループを抜ける
-            exit
-        end if
-    end do
+    !do
+    !    call iric_check_lock_f(fname0, ier)
+    !    if (ier == 1) then
+    !        call sleep(1)
+    !    elseif (ier == 0) then  !読込中でなければdoループを抜ける
+    !        exit
+    !    end if
+    !end do
     call iric_write_sol_start_f(fname0, ier)
       
 	!----------------------------------------------------------------------
@@ -154,7 +179,14 @@ subroutine rescomp(lmax, isize, jsize, xx, yy)
                     !call iric_write_sol_end_f(fname0, ier)
                     !stop
                 end if
-				call cg_iric_write_sol_real_mul_f(idf0, wbuf(1:30), rval(n,m,:,:), ier)
+                
+                do j= 1, jsize
+                    do i = 1, isize
+                        rval_tmp(i,j) = rval(n,m,i,j)
+                    end do
+                end do
+                
+				call cg_iric_write_sol_real_mul_f(idf0, wbuf(1:30), rval_tmp, ier)
 			end do
       end do
 		
@@ -174,7 +206,14 @@ subroutine rescomp(lmax, isize, jsize, xx, yy)
                     !call iric_write_sol_end_f(fname0, ier)
                     !stop
                 end if
-                call cg_iric_write_sol_real_mul_f(idf0, wbuf(1:30), delt_rval(n,m,:,:), ier)
+                
+                
+                do j= 1, jsize
+                    do i = 1, isize
+                        rval_tmp(i,j) = delt_rval(n,m,i,j)
+                    end do
+                end do
+                call cg_iric_write_sol_real_mul_f(idf0, wbuf(1:30), rval_tmp, ier)
             end do
          
          !合成流速の差分値
@@ -188,7 +227,12 @@ subroutine rescomp(lmax, isize, jsize, xx, yy)
                     !write(*,"(a)") "So I would like to reccomend to change the case's name into a short one."
                     
                 end if
-		   call cg_iric_write_sol_real_mul_f(idf0, wbuf(1:30), delt_sum_v(n,:,:), ier)
+           do j= 1, jsize
+                    do i = 1, isize
+                        rval_tmp(i,j) = delt_sum_v(n,i,j)
+                    end do
+                end do
+		   call cg_iric_write_sol_real_mul_f(idf0, wbuf(1:30), rval_tmp, ier)
         end do
       
         !HDDへ吐き出し
@@ -215,6 +259,7 @@ subroutine rescomp(lmax, isize, jsize, xx, yy)
 				,  trim(cname(n))//"_WaterSurfaceElevation(m)", "," &
 				,  trim(cname(n))//"_VelocityX(m/s)", "," &
 				,  trim(cname(n))//"_VelocityY(m/s)", "," &
+                ,  trim(cname(n))//"_zmin(m)", "," &
 				, n=0, nmax-1)
 	
 			!出力
@@ -231,6 +276,7 @@ subroutine rescomp(lmax, isize, jsize, xx, yy)
 								,  rval(   n, 2, judan(id)%ip, judan(id)%jp), "," &
 								,  rval(   n, 3, judan(id)%ip, judan(id)%jp), "," &
 								,  rval(   n, 4, judan(id)%ip, judan(id)%jp), "," &
+                                ,  zmin(   n, judan(id)%ip), "," &
 								, n = 0, nmax-1)				
 				
 			end do
