@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<SolverDefinition
+  	name="cat2d"
+  	caption="CAT2D version1.0"
+  	version="1.0"
+	copyright="RiverLink, Co., Ltd."
+	release="2015.11.01"
+	homepage="http://river-link.co.jp/"
+	executable="cat2d.exe"
+	iterationtype="time"
+	gridtype="structured2d,unstructured2d"
+>
+   <CalculationCondition>
+<!--      <Tab name="compcond" caption="Compare Condition">
+         <Item name="meshtype" caption="Grid type?">
+            <Definition valueType="integer" default="0">
+               <Enumerations>
+                  <Enumeration value="0" caption="Structured"/>
+                  <Enumeration value="1" caption="UnStructured"/>
+               </Enumerations>
+            </Definition>
+         </Item>
+      </Tab> -->
+      <Tab name="compfiles" caption="Files">
+         <Item name="nmax" caption="Number of comparison cases">
+            <Definition valueType="integer" default="2">
+               <Enumerations>
+                  <Enumeration value="2" caption="2"/>
+                  <Enumeration value="3" caption="3"/>
+                  <Enumeration value="4" caption="4"/>
+                  <!--<Enumeration value="5" caption="5"/>
+                  <Enumeration value="6" caption="6"/>-->
+                  <!--<Enumeration value="7" caption="7"/>
+                  <Enumeration value="8" caption="8"/>
+                  <Enumeration value="9" caption="9"/>
+                  <Enumeration value="10" caption="10"/>-->
+               </Enumerations>
+            </Definition>
+         </Item>
+         <GroupBox caption="Base Case">
+            <Item name="cname0" caption="Case Name">
+               <Definition valueType="string" default="BaseCase">
+               </Definition>
+            </Item>
+            <Item name="fname0" caption="CGN File">
+		         <Definition valueType="filename" default="Case0.cgn">
+               </Definition>
+            </Item>
+            <Item name="pname0" caption="Comparison Parameters Name">
+               <Definition valueType="filename" default="parametername.csv">
+               </Definition>
+            </Item>
+         </GroupBox>
+         <GroupBox caption="Case1">
+            <Item name="cname1" caption="Case Name">
+               <Definition valueType="string" default="Case1">
+               </Definition>
+            </Item>
+            <Item name="fname1" caption="CGN File">
+			      <Definition valueType="filename" default="Case1.cgn"></Definition>
+            </Item>
+         </GroupBox>
+         <GroupBox caption="Case2">
+            <Item name="cname2" caption="Case Name">
+               <Definition valueType="string" default="Case2">
+                  <Condition type="isGreaterThan" target="nmax" value="2"/>
+               </Definition>
+            </Item>
+            <Item name="fname2" caption="CGN File">
+               <Definition valueType="filename" default="Case2.cgn">
+                  <Condition type="isGreaterThan" target="nmax" value="2"/>
+               </Definition>
+            </Item>
+         </GroupBox>
+         <GroupBox caption="Case3">
+            <Item name="cname3" caption="Case Name">
+               <Definition valueType="string" default="Case3">
+                  <Condition type="isGreaterThan" target="nmax" value="3"/>
+               </Definition>
+            </Item>
+            <Item name="fname3" caption="CGN File">
+			      <Definition valueType="filename" default="Case3.cgn">
+                  <Condition type="isGreaterThan" target="nmax" value="3"/>
+               </Definition>
+            </Item>
+         </GroupBox>
+         <!--<GroupBox caption="Case4">
+            <Item name="cname4" caption="Case Name">
+               <Definition valueType="string" default="Case4">
+                  <Condition type="isGreaterThan" target="nmax" value="4"/>
+               </Definition>
+            </Item>
+            <Item name="fname4" caption="CGN File">
+               <Definition valueType="filename" default="Case4.cgn">
+                  <Condition type="isGreaterThan" target="nmax" value="4"/>
+               </Definition>
+            </Item>
+         </GroupBox>
+         <GroupBox caption="Case5">
+            <Item name="cname5" caption="Case Name">
+               <Definition valueType="string" default="Case5">
+                  <Condition type="isGreaterThan" target="nmax" value="5"/>
+               </Definition>
+            </Item>
+            <Item name="fname5" caption="CGN File">
+               <Definition valueType="filename" default="Case5.cgn">
+                  <Condition type="isGreaterThan" target="nmax" value="5"/>
+               </Definition>
+            </Item>
+         </GroupBox>-->
+         <!--
+         <GroupBox>
+            <Item name="casename6" caption="Case Name6">
+               <Definition valueType="string" default="Case6">
+               </Definition>
+            </Item>
+            <Item name="case6" caption="Case6">
+			      <Definition valueType="filename" default="Case6.cgn">
+                  <Condition type="isGreaterThan" target="nmax" value="6"/>
+               </Definition>
+            </Item>
+         </GroupBox>
+         <GroupBox>
+            <Item name="casename7" caption="Case Name7">
+               <Definition valueType="string" default="Case7">
+               </Definition>
+            </Item>
+            <Item name="case7" caption="Case7">
+               <Definition valueType="filename" default="Case7.cgn">
+                  <Condition type="isGreaterThan" target="nmax" value="7"/>
+               </Definition>
+            </Item>
+         </GroupBox>
+         <GroupBox>
+            <Item name="casename8" caption="Case Name8">
+               <Definition valueType="string" default="Case8">
+               </Definition>
+            </Item>
+            <Item name="case8" caption="Case8">
+			      <Definition valueType="filename" default="Case8.cgn">
+                  <Condition type="isGreaterThan" target="nmax" value="8"/>
+               </Definition>
+            </Item>
+         </GroupBox>
+         <GroupBox>
+            <Item name="casename9" caption="Case Name9">
+               <Definition valueType="string" default="Case9">
+               </Definition>
+            </Item>
+            <Item name="case9" caption="Case9">
+               <Definition valueType="filename" default="Case9.cgn">
+                  <Condition type="isGreaterThan" target="nmax" value="9"/>
+               </Definition>
+            </Item>
+         </GroupBox>
+         -->
+      </Tab>
+      <Tab name="jyuoudan" caption="Longitudinal and Cross Sectional Data">
+         <Item name="juoudan_output" caption="Output">
+            <Definition valueType="integer" default="1">
+               <Enumerations>
+                  <Enumeration value="0" caption="Valid"/>
+                  <Enumeration value="1" caption="Invalid"/>
+               </Enumerations>
+            </Definition>
+         </Item>
+         <Item name="juoudan_folder" caption="Output Folder">
+            <Definition valueType="foldername" default="C:\">
+               <Condition type="isEqual" target="juoudan_output" value="0"/>
+            </Definition>
+         </Item>
+      </Tab>
+   </CalculationCondition>
+   <GridRelatedCondition>
+      <Item name="Elevation" caption="Elevation">
+         <Definition position="node" valueType="real" default="max" />
+      </Item>
+   </GridRelatedCondition>
+</SolverDefinition>
